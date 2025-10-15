@@ -33,10 +33,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Explicitly handle all OPTIONS preflight requests with status 200
-app.options('*', (req, res) => {
-  res.sendStatus(200);
-});
+// Fix here: must use '/*' instead of '*'
+app.options('/*', cors(corsOptions));
 
 app.use(express.json());
 
