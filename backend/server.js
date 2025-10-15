@@ -33,8 +33,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Handle OPTIONS preflight requests for all routes
-app.options('*', cors(corsOptions));
+// Explicitly handle all OPTIONS preflight requests with status 200
+app.options('*', (req, res) => {
+  res.sendStatus(200);
+});
 
 app.use(express.json());
 
