@@ -13,16 +13,15 @@ const app = express();
 
 const allowedOrigins = [
   'https://bgm-snacks-frontend-h6pl.vercel.app',
-  'http://localhost:3000'  // For local development
+  'http://localhost:3000'
 ];
 
-// CORS configuration with dynamic origin checking
-app.use(cors({
+// CORS configuration
+const corsOptions = {
   origin: function(origin, callback) {
-    // allow requests with no origin, like curl or mobile apps
-    if (!origin) return callback(null, true);
+    if (!origin) return callback(null, true); // allow non-browser calls like Postman
     if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
       return callback(new Error(msg), false);
     }
     return callback(null, true);
@@ -30,25 +29,28 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
+
+// Handle OPTIONS preflight requests for all routes
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
-// Connect to MongoDB
 mongoose.connect(MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.log('MongoDB connection error:', err));
 
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/address', addressRoutes);
 app.use('/api/order', orderRoutes);
 
-// Global error handler to catch CORS errors
+// Global error handler for CORS errors
 app.use((err, req, res, next) => {
-  if (err instanceof Error && err.message.includes('CORS')) {
+  if (err.message && err.message.includes('CORS')) {
     return res.status(403).json({ error: err.message });
   }
   next(err);
