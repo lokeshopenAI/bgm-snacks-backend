@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const { MONGO_URI } = require('./config');
-
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
@@ -11,20 +10,21 @@ const orderRoutes = require('./routes/order');
 
 const app = express();
 
+// ✅ Add your frontend domain to allowed origins
 const allowedOrigins = [
-  'https://bgm-snacks-frontend-h6pl.vercel.app',
+  'https://bgm-snacks-frontend-nb88.vercel.app',
   'http://localhost:3000'
 ];
 
-// CORS configuration
+// ✅ CORS configuration
 const corsOptions = {
-  origin: function(origin, callback) {
-    if (!origin) return callback(null, true); // allow non-browser calls like Postman
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
-      return callback(new Error(msg), false);
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Allow non-browser tools like Postman
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error(`CORS policy does not allow access from origin: ${origin}`), false);
     }
-    return callback(null, true);
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -33,7 +33,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Explicitly handle OPTIONS preflight requests with dynamic Access-Control-Allow-Origin header
+// ✅ Handle preflight OPTIONS requests
 app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
     const origin = req.headers.origin;
@@ -60,7 +60,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/address', addressRoutes);
 app.use('/api/order', orderRoutes);
 
-// Global error handler for CORS errors
+// ✅ Global error handler for CORS
 app.use((err, req, res, next) => {
   if (err.message && err.message.includes('CORS')) {
     return res.status(403).json({ error: err.message });
