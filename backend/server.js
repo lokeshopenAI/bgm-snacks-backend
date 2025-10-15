@@ -33,8 +33,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Fix here: must use '/*' instead of '*'
-app.options('/*', cors(corsOptions));
+// Correct use of wildcard for OPTIONS preflight requests
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
